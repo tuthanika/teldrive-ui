@@ -16,6 +16,7 @@ type SettingKeys =
   | "pageSize"
   | "splitFileSize"
   | "encryptFiles"
+  | "uploadAsMedia"
   | "rcloneProxy";
 
 type SettingValue = string | number | boolean;
@@ -97,6 +98,14 @@ export const generalSettingsConfig: SettingFieldConfig<SettingValue>[] = [
     type: "switch",
     label: "Encrypt Files",
     description: "Encrypt Files before uploading",
+    defaultValue: false,
+    category: "upload",
+  },
+  {
+    key: "uploadAsMedia",
+    type: "switch",
+    label: "Upload as Media",
+    description: "Upload videos and audio as playable native media",
     defaultValue: false,
     category: "upload",
   },

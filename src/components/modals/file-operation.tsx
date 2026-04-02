@@ -10,6 +10,8 @@ import {
   ModalFooter,
   ModalHeader,
   Switch,
+  Select,
+  SelectItem,
 } from "@tw-material/react";
 import { useShallow } from "zustand/react/shallow";
 
@@ -398,6 +400,148 @@ const ShareFileDialog = memo(({ handleClose }: ShareFileDialogProps) => {
   );
 });
 
+interface AssignChannelDialogProps {
+  queryKey: any;
+  handleClose: () => void;
+}
+
+const AssignChannelDialog = memo(({ queryKey, handleClose }: AssignChannelDialogProps) => {
+  const queryClient = useQueryClient();
+  const { currentFile, actions } = useModalStore(
+    useShallow((state) => ({
+      currentFile: state.currentFile,
+      actions: state.actions,
+    })),
+  );
+
+  const [localChannelId, setLocalChannelId] = useState((currentFile as any).channelId?.toString() || "");
+  const [localTopicId, setLocalTopicId] = useState((currentFile as any).topicId?.toString() || "");
+
+  const { data: channelData, isLoading: channelsLoading } = useQuery($api.queryOptions("get", "/users/channels"));
+
+  const { data: topicData, isLoading: topicsLoading } = useQuery({
+    ...$api.queryOptions("get", "/users/channels/{id}/topics", { params: { path: { id: localChannelId } } }),
+    enabled: !!localChannelId && !localChannelId.startsWith("-100"), // Only fetch topics if we have a valid channel ID (the API expects the short ID usually)
+  });
+
+  const updateFiles = $api.useMutation("patch", "/files/{id}", {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey });
+    },
+  });
+
+  const onAssign = useCallback(
+    () => {
+      let channelId = localChannelId;
+      if (channelId.startsWith("-100")) {
+        channelId = channelId.slice(4);
+      }
+      updateFiles
+        .mutateAsync({
+          params: {
+            path: {
+              id: currentFile.id,
+            },
+          },
+          body: {
+            channelId: channelId ? Number(channelId) : undefined,
+            topicId: localTopicId ? Number(localTopicId) : undefined,
+          },
+        })
+        .then(handleClose);
+    },
+    [currentFile.id, localChannelId, localTopicId, handleClose],
+  );
+
+  return (
+    <>
+      <ModalHeader className="flex flex-col gap-1">Assign Channel & Topic</ModalHeader>
+      <ModalBody className="gap-4">
+        <Select
+          label="Select Channel"
+          placeholder="Choose a channel"
+          isLoading={channelsLoading}
+          selectedKeys={localChannelId ? new Set([localChannelId.toString()]) : new Set()}
+          onSelectionChange={(keys) => {
+            const selected = Array.from(keys)[0];
+            if (selected) {
+              setLocalChannelId(selected.toString());
+              setLocalTopicId(""); // Reset topic when channel changes
+            }
+          }}
+        >
+          {(channelData || []).map((channel) => (
+            <SelectItem 
+              key={channel.channelId?.toString() || ""} 
+              value={channel.channelId?.toString()}
+              textValue={`${channel.channelName} (${channel.channelId})`}
+            >
+              {channel.channelName} ({channel.channelId})
+            </SelectItem>
+          ))}
+        </Select>
+
+        {topicData && topicData.length > 0 && (
+          <Select
+            label="Select Topic (Optional)"
+            placeholder="Choose a topic"
+            isLoading={topicsLoading}
+            selectedKeys={localTopicId ? new Set([localTopicId.toString()]) : new Set()}
+            onSelectionChange={(keys) => {
+              const selected = Array.from(keys)[0];
+              if (selected) {
+                setLocalTopicId(selected.toString());
+              }
+            }}
+          >
+            {topicData.map((topic) => (
+              <SelectItem 
+                key={topic.id?.toString() || ""} 
+                value={topic.id?.toString()}
+                textValue={topic.name}
+              >
+                {topic.name}
+              </SelectItem>
+            ))}
+          </Select>
+        )}
+
+        <div className="flex flex-col gap-4 p-4 border border-outline-variant/30 rounded-2xl bg-surface-container-low">
+          <p className="text-sm font-medium">Manual Override</p>
+          <Input
+            label="Channel ID"
+            variant="bordered"
+            placeholder="-100..."
+            value={localChannelId}
+            onValueChange={setLocalChannelId}
+          />
+          <Input
+            label="Topic ID (Optional)"
+            variant="bordered"
+            placeholder="e.g. 123"
+            value={localTopicId}
+            onValueChange={setLocalTopicId}
+          />
+        </div>
+      </ModalBody>
+      <ModalFooter>
+        <Button className="font-normal" variant="text" onPress={handleClose}>
+          Close
+        </Button>
+        <Button
+          className="font-normal"
+          variant="filledTonal"
+          onPress={onAssign}
+          isDisabled={updateFiles.isPending}
+          isLoading={updateFiles.isPending}
+        >
+          Assign
+        </Button>
+      </ModalFooter>
+    </>
+  );
+});
+
 export const FileOperationModal = memo(({ queryKey }: FileModalProps) => {
   const { open, operation, actions } = useModalStore(
     useShallow((state) => ({
@@ -425,6 +569,8 @@ export const FileOperationModal = memo(({ queryKey }: FileModalProps) => {
         return <DeleteDialog queryKey={queryKey} handleClose={handleClose} />;
       case CustomActions.ShareFiles.id:
         return <ShareFileDialog handleClose={handleClose} />;
+      case CustomActions.AssignChannel.id:
+        return <AssignChannelDialog queryKey={queryKey} handleClose={handleClose} />;
       default:
         return null;
     }
@@ -440,6 +586,7 @@ export const FileOperationModal = memo(({ queryKey }: FileModalProps) => {
       }}
       placement="center"
       onClose={handleClose}
+      isDismissable={false}
       hideCloseButton
     >
       <ModalContent>{renderOperation}</ModalContent>

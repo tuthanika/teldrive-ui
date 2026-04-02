@@ -70,6 +70,7 @@ export const uploadFile = async (
   retries: number,
   retryDelay: number,
   encyptFile: boolean,
+  uploadAsMedia: boolean,
   randomChunking: boolean,
   signal: AbortSignal,
   onProgress: (progress: number) => void,
@@ -151,7 +152,9 @@ export const uploadFile = async (
             fileName,
             partNo: partIndex + 1,
             encrypted: encyptFile,
+            uploadAsMedia,
             channelId,
+            path,
           } as const;
 
           let retryCount = 0;

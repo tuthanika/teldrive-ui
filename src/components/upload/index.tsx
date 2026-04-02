@@ -249,6 +249,7 @@ export const Upload = ({ queryKey }: UploadProps) => {
           Number(settings.uploadRetries),
           Number(settings.uploadRetryDelay),
           Boolean(settings.encryptFiles),
+          Boolean(settings.uploadAsMedia),
           Boolean(settings.randomChunking),
           currentFile.controller.signal,
           (progress) => actions.setProgress(currentFile.id, progress),

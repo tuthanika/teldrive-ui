@@ -23,6 +23,7 @@ import { getSortState, SortOrder } from "@/utils/defaults";
 import { useFileUploadStore, useModalStore } from "@/utils/stores";
 import Share from "~icons/fluent/share-24-regular";
 import MaterialSymbolsFolder from "~icons/material-symbols/folder";
+import MaterialSymbolsCampaign from "~icons/material-symbols/campaign";
 import { useNavigate } from "@tanstack/react-router";
 import { $api } from "@/utils/api";
 
@@ -56,6 +57,17 @@ export const CustomActions = {
       name: "Share",
       contextMenu: true,
       icon: Share,
+    },
+  } as const),
+
+  AssignChannel: defineFileAction({
+    id: "assign_channel",
+    requiresSelection: true,
+    fileFilter: (file) => file && "isDir" in file,
+    button: {
+      name: "Assign Channel",
+      contextMenu: true,
+      icon: MaterialSymbolsCampaign,
     },
   } as const),
 
@@ -212,6 +224,15 @@ export const useFileAction = (
           actions.set({
             open: true,
             operation: CustomActions.ShareFiles.id,
+            currentFile: data.state.selectedFiles[0],
+          });
+          break;
+        }
+
+        case CustomActions.AssignChannel.id: {
+          actions.set({
+            open: true,
+            operation: CustomActions.AssignChannel.id,
             currentFile: data.state.selectedFiles[0],
           });
           break;

@@ -1,6 +1,6 @@
 import { memo, useCallback, useState } from "react";
 import type { UserSession } from "@/types";
-import { useQueryClient, useSuspenseQueries } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useSuspenseQueries } from "@tanstack/react-query";
 import {
   Button,
   Textarea,
@@ -12,6 +12,8 @@ import {
   ModalFooter,
   Modal,
   ModalContent,
+  Select,
+  SelectItem,
 } from "@tw-material/react";
 import IcRoundContentCopy from "~icons/ic/round-content-copy";
 import IcRoundRemoveCircleOutline from "~icons/ic/round-remove-circle-outline";
@@ -434,20 +436,12 @@ export const AccountTab = memo(() => {
     [botAddition],
   );
 
-  const handleSetDefaultChannel = useCallback(
-    (channelId: number) => {
-      const channel = channelData?.find((c) => c.channelId === channelId);
-      if (channel) {
-        updateChannel.mutate({
-          body: {
-            channelId: channel.channelId,
-            channelName: channel.channelName,
-          },
-        });
-      }
-    },
-    [channelData, updateChannel],
-  );
+  const { data: topicData, isLoading: topicsLoading } = useQuery({
+    ...$api.queryOptions("get", "/users/channels/{id}/topics", {
+      params: { path: { id: userConfig.channelId?.toString() || "" } },
+    }),
+    enabled: !!userConfig.channelId,
+  });
 
   const [botOpen, setBotOpen] = useState(false);
   const [channelOpen, setChannelOpen] = useState(false);
@@ -455,6 +449,22 @@ export const AccountTab = memo(() => {
     "add",
   );
   const [channelID, setChannelID] = useState(0);
+
+  const handleSetDefaultChannel = useCallback(
+    (channelId: number, topicId?: number) => {
+      const channel = channelData?.find((c) => c.channelId === channelId);
+      if (channel) {
+        updateChannel.mutate({
+          body: {
+            channelId: channel.channelId,
+            channelName: channel.channelName,
+            topicId: topicId,
+          },
+        });
+      }
+    },
+    [channelData, updateChannel],
+  );
 
   return (
     <div
@@ -611,31 +621,66 @@ export const AccountTab = memo(() => {
               {channelData.map((channel) => (
                 <div
                   key={channel.channelId}
-                  className="flex justify-between items-center p-4 rounded-2xl bg-surface-container hover:bg-surface-container-high transition-colors border border-transparent hover:border-outline-variant/30"
+                  className="flex flex-col gap-3 p-4 rounded-2xl bg-surface-container hover:bg-surface-container-high transition-colors border border-transparent hover:border-outline-variant/30"
                 >
-                  <div className="flex-1 flex flex-col">
-                    <Radio
-                      value={channel.channelId!.toString()}
-                      classNames={{ label: "text-base font-semibold" }}
+                  <div className="flex justify-between items-center w-full">
+                    <div className="flex-1 flex flex-col">
+                      <Radio
+                        value={channel.channelId!.toString()}
+                        classNames={{ label: "text-base font-semibold" }}
+                      >
+                        {channel.channelName}
+                      </Radio>
+                      <p className="text-sm text-on-surface-variant ml-8 mt-0.5 font-mono">
+                        ID: {channel.channelId}
+                      </p>
+                    </div>
+                    <Button
+                      isIconOnly
+                      variant="text"
+                      className="text-on-surface-variant data-[hover=true]:text-error transition-colors"
+                      onPress={() => {
+                        setChannelOperation("delete");
+                        setChannelID(channel.channelId!);
+                        setChannelOpen(true);
+                      }}
                     >
-                      {channel.channelName}
-                    </Radio>
-                    <p className="text-sm text-on-surface-variant ml-8 mt-0.5 font-mono">
-                      ID: {channel.channelId}
-                    </p>
+                      <DeleteIcon className="size-5" />
+                    </Button>
                   </div>
-                  <Button
-                    isIconOnly
-                    variant="text"
-                    className="text-on-surface-variant data-[hover=true]:text-error transition-colors"
-                    onPress={() => {
-                      setChannelOperation("delete");
-                      setChannelID(channel.channelId!);
-                      setChannelOpen(true);
-                    }}
-                  >
-                    <DeleteIcon className="size-5" />
-                  </Button>
+                  {userConfig.channelId === channel.channelId &&
+                    topicData &&
+                    topicData.length > 0 && (
+                      <div className="ml-8">
+                        <Select
+                          label="Default Topic"
+                          size="sm"
+                          placeholder="Select a topic"
+                          isLoading={topicsLoading}
+                          selectedKeys={
+                            userConfig.topicId ? [userConfig.topicId.toString()] : []
+                          }
+                          onSelectionChange={(keys) => {
+                            const selected = Array.from(keys)[0];
+                            if (selected) {
+                              handleSetDefaultChannel(
+                                channel.channelId!,
+                                Number(selected),
+                              );
+                            }
+                          }}
+                        >
+                          {topicData.map((topic) => (
+                            <SelectItem
+                              key={topic.id?.toString() || ""}
+                              value={topic.id?.toString()}
+                            >
+                              {topic.name}
+                            </SelectItem>
+                          ))}
+                        </Select>
+                      </div>
+                    )}
                 </div>
               ))}
             </RadioGroup>
