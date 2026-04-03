@@ -4,6 +4,7 @@ import IconBasilGoogleDriveOutline from "~icons/basil/google-drive-outline";
 import IconIcOutlineSdStorage from "~icons/ic/outline-sd-storage";
 import IconMdiRecent from "~icons/mdi/recent";
 import ShareIcon from "~icons/fluent/share-24-regular";
+import IconMdiRadar from "~icons/mdi/radar";
 import clsx from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation, useParams } from "@tanstack/react-router";
@@ -15,6 +16,7 @@ export const categories = [
   { id: "recent", name: "Recent", icon: IconMdiRecent },
   { id: "shared", name: "Shared", icon: ShareIcon },
   { id: "storage", name: "Storage", icon: IconIcOutlineSdStorage },
+  { id: "scan", name: "Scan", icon: IconMdiRadar },
 ] as const;
 
 interface SidNavItemProps {
@@ -28,14 +30,16 @@ const SidNavItem = memo(({ id, icon: Icon, name }: SidNavItemProps) => {
   const location = useLocation();
 
   const isActive =
-    id === "storage" ? location.pathname === "/storage" : params.view === id;
+    (id === "storage" || id === "scan") ? location.pathname === `/${id}` : params.view === id;
+
+  const toPath = (id === "storage" || id === "scan") ? `/${id}` : "/$view";
 
   return (
     <li className="flex flex-col gap-1 w-16 items-center">
       <Button
         as={ForwardLink}
         disableRipple
-        to={id === "storage" ? "/storage" : "/$view"}
+        to={toPath}
         params={{ view: id }}
         search={id === "my-drive" ? { path: "/" } : {}}
         variant="text"

@@ -6,6 +6,8 @@ import { Button } from "@tw-material/react";
 import { generalSettingsConfig, categoryConfig } from "@/config/settings";
 import { SettingsField } from "./settings-field";
 import { useSettingsStore } from "@/utils/stores/settings";
+import { $api } from "@/utils/api";
+import { useEffect } from "react";
 
 import IcBaselineCloudUpload from "~icons/ic/baseline-cloud-upload";
 import IcBaselineSettings from "~icons/ic/baseline-settings";
@@ -19,7 +21,21 @@ const iconMap: Record<string, React.ElementType> = {
 };
 
 export const GeneralTab = memo(() => {
-  const { settings, updateSetting, resetSettings } = useSettingsStore();
+  const { settings, updateSetting, updateSettings, resetSettings } = useSettingsStore();
+
+  useEffect(() => {
+    const fetchConcurrency = async () => {
+      try {
+        const { data } = await $api.get("/scans/concurrency", {});
+        if (data?.limit !== undefined) {
+          updateSettings({ scanConcurrency: data.limit });
+        }
+      } catch (error) {
+        console.error("Failed to fetch scan concurrency:", error);
+      }
+    };
+    fetchConcurrency();
+  }, [updateSettings]);
 
   const categories = ["upload", "display", "other"] as const;
 
@@ -30,6 +46,15 @@ export const GeneralTab = memo(() => {
         return;
       }
       updateSetting(key, value);
+      if (key === "scanConcurrency") {
+        $api
+          .mutate("put", "/scans/concurrency", {
+            body: { limit: Number(value) },
+          })
+          .catch((err) => {
+            console.error("Failed to update scan concurrency:", err);
+          });
+      }
     },
     [updateSetting],
   );

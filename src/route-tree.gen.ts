@@ -14,6 +14,7 @@ import { Route as AuthedRouteImport } from "./routes/_authed"
 import { Route as AuthRouteImport } from "./routes/_auth"
 import { Route as AuthedIndexRouteImport } from "./routes/_authed/index"
 import { Route as AuthedStorageRouteImport } from "./routes/_authed/storage"
+import { Route as AuthedScanRouteImport } from "./routes/_authed/scan"
 import { Route as AuthedSettingsRouteImport } from "./routes/_authed/settings"
 import { Route as AuthedViewRouteImport } from "./routes/_authed/$view"
 import { Route as AuthLoginRouteImport } from "./routes/_auth/login"
@@ -43,6 +44,13 @@ const AuthedStorageRoute = AuthedStorageRouteImport.update({
   getParentRoute: () => AuthedRoute,
 } as any).lazy(() =>
   import("./routes/_authed/storage.lazy").then((d) => d.Route),
+)
+const AuthedScanRoute = AuthedScanRouteImport.update({
+  id: "/scan",
+  path: "/scan",
+  getParentRoute: () => AuthedRoute,
+} as any).lazy(() =>
+  import("./routes/_authed/scan.lazy").then((d) => d.Route),
 )
 const AuthedSettingsRoute = AuthedSettingsRouteImport.update({
   id: "/settings",
@@ -99,6 +107,7 @@ export interface FileRoutesById {
   "/_authed/$view": typeof AuthedViewRoute
   "/_authed/settings": typeof AuthedSettingsRouteWithChildren
   "/_authed/storage": typeof AuthedStorageRoute
+  "/_authed/scan": typeof AuthedScanRoute
   "/_authed/": typeof AuthedIndexRoute
   "/_authed/settings/$tabId": typeof AuthedSettingsTabIdRoute
   "/_share/share/$id": typeof ShareShareIdRoute
@@ -131,6 +140,7 @@ export interface FileRouteTypes {
     | "/_authed/$view"
     | "/_authed/settings"
     | "/_authed/storage"
+    | "/_authed/scan"
     | "/_authed/"
     | "/_authed/settings/$tabId"
     | "/_share/share/$id"
@@ -177,6 +187,13 @@ declare module "@tanstack/react-router" {
       path: "/storage"
       fullPath: "/storage"
       preLoaderRoute: typeof AuthedStorageRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    "/_authed/scan": {
+      id: "/_authed/scan"
+      path: "/scan"
+      fullPath: "/scan"
+      preLoaderRoute: typeof AuthedScanRouteImport
       parentRoute: typeof AuthedRoute
     }
     "/_authed/settings": {
@@ -243,6 +260,7 @@ interface AuthedRouteChildren {
   AuthedViewRoute: typeof AuthedViewRoute
   AuthedSettingsRoute: typeof AuthedSettingsRouteWithChildren
   AuthedStorageRoute: typeof AuthedStorageRoute
+  AuthedScanRoute: typeof AuthedScanRoute
   AuthedIndexRoute: typeof AuthedIndexRoute
 }
 
@@ -250,6 +268,7 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedViewRoute: AuthedViewRoute,
   AuthedSettingsRoute: AuthedSettingsRouteWithChildren,
   AuthedStorageRoute: AuthedStorageRoute,
+  AuthedScanRoute: AuthedScanRoute,
   AuthedIndexRoute: AuthedIndexRoute,
 }
 

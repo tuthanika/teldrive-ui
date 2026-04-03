@@ -17,7 +17,8 @@ type SettingKeys =
   | "splitFileSize"
   | "encryptFiles"
   | "uploadAsMedia"
-  | "rcloneProxy";
+  | "rcloneProxy"
+  | "scanConcurrency";
 
 type SettingValue = string | number | boolean;
 
@@ -124,6 +125,14 @@ export const generalSettingsConfig: SettingFieldConfig<SettingValue>[] = [
     description: "Play Files directly from Rclone Webdav",
     placeholder: "http://localhost:8080",
     category: "other",
+  },
+  {
+    key: "scanConcurrency",
+    type: "number",
+    label: "Scan Concurrency",
+    description: "Number of concurrent scan tasks",
+    defaultValue: 1,
+    category: "upload",
   },
 ];
 

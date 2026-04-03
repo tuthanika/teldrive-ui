@@ -445,6 +445,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/users/channels/{id}/topics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List channel topics */
+        get: operations["Users_listTopics"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/users/config": {
         parameters: {
             query?: never;
@@ -530,6 +547,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/scans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List all scan tasks */
+        get: operations["Scans_list"];
+        put?: never;
+        /** Create a new scan task */
+        post: operations["Scans_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/scans/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update scan task */
+        patch: operations["Scans_update"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -607,6 +659,8 @@ export interface components {
              * @description Unique numeric identifier of the channel
              */
             channelId?: number;
+            /** @description Default Topic ID for the channel */
+            topicId?: number;
         };
         /**
          * @description Telegram channel information
@@ -623,6 +677,8 @@ export interface components {
              * @description Unique numeric identifier of the channel
              */
             channelId?: number;
+            /** @description Default Topic ID for the channel */
+            topicId?: number;
         };
         /** @description Standard error response */
         Error: {
@@ -698,6 +754,11 @@ export interface components {
              * @example 123456789
              */
             channelId?: number;
+            /**
+             * @description Topic/Thread ID
+             * @example 123
+             */
+            topicId?: number;
             /**
              * @description File or Folder path
              * @example /documents/2023/
@@ -885,6 +946,11 @@ export interface components {
              * @example 123456
              */
             channelId?: number;
+            /**
+             * @description Topic/Thread ID
+             * @example 123
+             */
+            topicId?: number;
             /** @description Upload ID for hash calculation */
             uploadId?: string;
             /** @description File parts */
@@ -1096,8 +1162,23 @@ export interface components {
              * @description Channel identifier associated with the user
              */
             channelId: number;
+            /** @description Default Topic ID for the channel */
+            topicId?: number;
             /** @description List of bot tokens */
             bots: string[];
+        };
+        /** @description Telegram channel topic information */
+        Topic: {
+            /**
+             * @description Topic ID
+             * @example 1
+             */
+            id: number;
+            /**
+             * @description Topic name
+             * @example General
+             */
+            name: string;
         };
         /**
          * @description User session information
@@ -1129,6 +1210,54 @@ export interface components {
             valid: boolean;
             /** @description Indicates if this is the currently active session */
             current: boolean;
+        };
+        ScanTask: {
+            id: string;
+            /** Format: int64 */
+            userId: number;
+            folderId?: string;
+            folderName?: string;
+            /** Format: int64 */
+            channelId: number;
+            topicId?: number;
+            splitMode?: boolean;
+            ruleMode?: boolean;
+            ruleString?: string;
+            repeatEnabled?: boolean;
+            schedule?: string;
+            /** @enum {string} */
+            status: "waiting" | "running" | "completed" | "failed" | "cancelled";
+            scannedCount?: number;
+            importedCount?: number;
+            totalFiles?: number;
+            processedFiles?: number;
+            errors?: string;
+            logs?: Record<string, never>;
+            /** Format: date-time */
+            createdAt?: string;
+            /** Format: date-time */
+            updatedAt?: string;
+        };
+        ScanTaskCreate: {
+            folderId?: string;
+            folderName?: string;
+            /** Format: int64 */
+            channelId: number;
+            topicId?: number;
+            splitMode?: boolean;
+            ruleMode?: boolean;
+            ruleString?: string;
+            repeatEnabled?: boolean;
+            schedule?: string;
+            /** @enum {string} */
+            status?: "waiting" | "running";
+        };
+        ScanTaskUpdate: {
+            /** @enum {string} */
+            status?: "waiting" | "running" | "completed" | "failed" | "cancelled";
+        };
+        ScanTaskList: {
+            items: components["schemas"]["ScanTask"][];
         };
     };
     responses: never;
@@ -1183,6 +1312,8 @@ export interface components {
         "UploadQuery.encrypted": boolean;
         /** @description Whether the file should be uploaded as playable media */
         "UploadQuery.uploadAsMedia": boolean;
+        /** @description Optional topic/thread identifier for upload */
+        "UploadQuery.topicId": number;
         /** @description Original file name */
         "UploadQuery.fileName": string;
         /** @description Enable BLAKE3 hashing for integrity checking */
@@ -2156,6 +2287,8 @@ export interface operations {
                 encrypted?: components["parameters"]["UploadQuery.encrypted"];
                 /** @description Whether the file should be uploaded as playable media */
                 uploadAsMedia?: components["parameters"]["UploadQuery.uploadAsMedia"];
+                /** @description Optional topic/thread identifier for upload */
+                topicId?: components["parameters"]["UploadQuery.topicId"];
                 /** @description Enable BLAKE3 hashing for integrity checking */
                 hashing?: components["parameters"]["UploadQuery.hashing"];
             };
@@ -2427,6 +2560,37 @@ export interface operations {
             };
         };
     };
+    Users_listTopics: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The request has succeeded. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Topic"][];
+                };
+            };
+            /** @description An unexpected error response. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     Users_stats: {
         parameters: {
             query?: never;
@@ -2565,6 +2729,103 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiVersion"];
+                };
+            };
+            /** @description An unexpected error response. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    Scans_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The request has succeeded. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScanTaskList"];
+                };
+            };
+            /** @description An unexpected error response. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    Scans_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScanTaskCreate"];
+            };
+        };
+        responses: {
+            /** @description The request has succeeded and a new resource has been created as a result. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScanTask"];
+                };
+            };
+            /** @description An unexpected error response. */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    Scans_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ScanTaskUpdate"];
+            };
+        };
+        responses: {
+            /** @description The request has succeeded. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScanTask"];
                 };
             };
             /** @description An unexpected error response. */
