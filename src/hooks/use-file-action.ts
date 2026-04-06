@@ -33,10 +33,10 @@ export const CustomActions = {
     requiresSelection: true,
     fileFilter: (item) => !FileHelper.isDirectory(item) && item?.previewType === "video",
     button: {
-      name: "VLC",
+      name: "↳ VLC",
       toolbar: true,
       contextMenu: true,
-      group: "Phát với",
+      group: "Phát với ứng dụng ngoài",
       icon: IconFlatColorIconsVlc,
     },
   } as const),
@@ -45,10 +45,10 @@ export const CustomActions = {
     requiresSelection: true,
     fileFilter: (item) => !FileHelper.isDirectory(item) && item?.previewType === "video",
     button: {
-      name: "PotPlayer",
+      name: "↳ PotPlayer",
       toolbar: true,
       contextMenu: true,
-      group: "Phát với",
+      group: "Phát với ứng dụng ngoài",
       icon: IconPotPlayerIcon,
     },
   } as const),
@@ -57,10 +57,10 @@ export const CustomActions = {
     requiresSelection: true,
     fileFilter: (item) => !FileHelper.isDirectory(item) && item?.previewType === "video",
     button: {
-      name: "nPlayer",
+      name: "↳ nPlayer",
       toolbar: true,
       contextMenu: true,
-      group: "Phát với",
+      group: "Phát với ứng dụng ngoài",
       icon: IconPotPlayerIcon,
     },
   } as const),
@@ -198,7 +198,7 @@ export const useFileAction = (
           const fileToOpen = selectedFiles[0];
           const { id, name } = fileToOpen!;
           const streamUrl = mediaUrl(id, name, search?.path || "", session.hash, true);
-          const url = `vlc:${streamUrl}`;
+          const url = `vlc://${encodeURIComponent(streamUrl)}`;
           navigateToExternalUrl(url, false);
           break;
         }
@@ -207,7 +207,7 @@ export const useFileAction = (
           const fileToOpen = selectedFiles[0];
           const { id, name } = fileToOpen!;
           const streamUrl = mediaUrl(id, name, search?.path || "", session.hash, true);
-          const url = `potplayer://${streamUrl}`;
+          const url = `potplayer://${encodeURIComponent(streamUrl)}`;
           navigateToExternalUrl(url, false);
           break;
         }
@@ -216,7 +216,7 @@ export const useFileAction = (
           const fileToOpen = selectedFiles[0];
           const { id, name } = fileToOpen!;
           const streamUrl = mediaUrl(id, name, search?.path || "", session.hash, true);
-          const url = `nplayer-${streamUrl}`;
+          const url = `nplayer-${encodeURIComponent(streamUrl)}`;
           navigateToExternalUrl(url, false);
           break;
         }
@@ -386,7 +386,7 @@ export const useShareFileAction = (params: ShareListParams) => {
           const fileToOpen = selectedFiles[0];
           const { id, name } = fileToOpen!;
           const streamUrl = sharedMediaUrl(params.id, id, name, true);
-          const url = `vlc:${streamUrl}`;
+          const url = `vlc://${encodeURIComponent(streamUrl)}`;
           navigateToExternalUrl(url, false);
           break;
         }
@@ -395,7 +395,7 @@ export const useShareFileAction = (params: ShareListParams) => {
           const fileToOpen = selectedFiles[0];
           const { id, name } = fileToOpen!;
           const streamUrl = sharedMediaUrl(params.id, id, name, true);
-          const url = `potplayer://${streamUrl}`;
+          const url = `potplayer://${encodeURIComponent(streamUrl)}`;
           navigateToExternalUrl(url, false);
           break;
         }
@@ -404,7 +404,7 @@ export const useShareFileAction = (params: ShareListParams) => {
           const fileToOpen = selectedFiles[0];
           const { id, name } = fileToOpen!;
           const streamUrl = sharedMediaUrl(params.id, id, name, true);
-          const url = `nplayer-${streamUrl}`;
+          const url = `nplayer-${encodeURIComponent(streamUrl)}`;
           navigateToExternalUrl(url, false);
           break;
         }
