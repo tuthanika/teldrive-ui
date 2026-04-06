@@ -18,8 +18,9 @@ export const Player = forwardRef<Artplayer, PlayerProps>(
         ...option,
         container: artRef.current!,
       });
-      const externalSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"><path fill="currentColor" d="M14 3v2h3.59l-9.83 9.83l1.41 1.41L19 6.41V10h2V3m-2 16H5V5h7V3H5c-1.11 0-2 .89-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2z"/></svg>';
-      
+
+      const externalSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"><path fill="currentColor" d="M14 3v2h3.59-9.83 9.83l1.41 1.41L19 6.41V10h2V3m-2 16H5V5h7V3H5c-1.11 0-2 .89-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2z"/></svg>';
+
       art.controls.add({
         name: "external",
         position: "right",
@@ -30,11 +31,9 @@ export const Player = forwardRef<Artplayer, PlayerProps>(
             html: "VLC",
             onClick: function () {
               const streamUrl = art.option.url + (art.option.url.includes("?") ? "&" : "?") + "download=1";
-              const url = `vlc://${streamUrl}`;
               const a = document.createElement("a");
-              a.href = url;
+              a.href = `vlc://${streamUrl}`;
               a.click();
-              art.controls.external.html = externalSvg;
               art.notice.show = "Đang mở VLC...";
               return true;
             },
@@ -43,11 +42,11 @@ export const Player = forwardRef<Artplayer, PlayerProps>(
             html: "PotPlayer",
             onClick: function () {
               const streamUrl = art.option.url + (art.option.url.includes("?") ? "&" : "?") + "download=1";
-              const url = `potplayer://?${streamUrl}`;
+              const referer = window.location.origin;
               const a = document.createElement("a");
-              a.href = url;
+              // Theo link user gửi, format chuẩn là potplayer://URL/referer=REFERER
+              a.href = `potplayer://${streamUrl}/referer=${referer}`;
               a.click();
-              art.controls.external.html = externalSvg;
               art.notice.show = "Đang mở PotPlayer...";
               return true;
             },
@@ -56,18 +55,19 @@ export const Player = forwardRef<Artplayer, PlayerProps>(
             html: "nPlayer",
             onClick: function () {
               const streamUrl = art.option.url + (art.option.url.includes("?") ? "&" : "?") + "download=1";
-              const url = `nplayer-${streamUrl}`;
               const a = document.createElement("a");
-              a.href = url;
+              a.href = `nplayer-${streamUrl}`;
               a.click();
-              art.controls.external.html = externalSvg;
               art.notice.show = "Đang mở nPlayer...";
               return true;
             },
           },
         ],
+        onSelect: function () {
+          return externalSvg;
+        },
       });
-      
+
       if (ref && typeof ref !== "function") ref.current = art;
       else if (ref && typeof ref === "function") ref(art);
 
@@ -80,6 +80,7 @@ export const Player = forwardRef<Artplayer, PlayerProps>(
         }
       };
     }, [option]);
+
     return <div ref={artRef} {...rest} />;
   },
 );

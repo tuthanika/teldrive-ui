@@ -564,7 +564,7 @@ const ExternalPlayerDialog = memo(({ handleClose }: { handleClose: () => void })
 
     let url = "";
     if (player === "vlc") url = `vlc://${streamUrl}`;
-    if (player === "potplayer") url = `potplayer://?${streamUrl}`;
+    if (player === "potplayer") url = `potplayer://${streamUrl}/referer=${window.location.origin}`;
     if (player === "nplayer") url = `nplayer-${streamUrl}`;
 
     if (player === "copy") {
