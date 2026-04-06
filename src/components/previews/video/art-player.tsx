@@ -11,11 +11,25 @@ interface PlayerProps {
 export const Player = forwardRef<Artplayer, PlayerProps>(
   ({ option, ...rest }, ref) => {
     const artRef = useRef<HTMLDivElement>(null);
+    
+    // Hàm dùng chung để kích hoạt URL handler
+    const launchPlayer = (url: string) => {
+      const link = document.createElement("a");
+      link.href = url;
+      link.style.display = "none";
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => {
+        if (document.body.contains(link)) document.body.removeChild(link);
+      }, 100);
+    };
+
     useEffect(() => {
       const art = new Artplayer({
         ...option,
         container: artRef.current!,
       });
+
       art.controls.add({
         name: "external",
         position: "right",
@@ -26,10 +40,7 @@ export const Player = forwardRef<Artplayer, PlayerProps>(
             html: "VLC",
             onClick: function () {
               const streamUrl = art.option.url + (art.option.url.includes("?") ? "&" : "?") + "download=1";
-              const url = `vlc://${streamUrl}`;
-              const link = document.createElement("a");
-              link.href = url;
-              link.click();
+              launchPlayer(`vlc://${streamUrl}`);
               art.notice.show = "Đang mở VLC...";
               return true;
             },
@@ -38,12 +49,8 @@ export const Player = forwardRef<Artplayer, PlayerProps>(
             html: "PotPlayer",
             onClick: function () {
               const streamUrl = art.option.url + (art.option.url.includes("?") ? "&" : "?") + "download=1";
-              // Fix lỗi mất dấu ":" bằng cách encode thủ công duy nhất protocol con
-              const safeStreamUrl = streamUrl.replace("://", "%3a//");
-              const url = `potplayer://${safeStreamUrl}`;
-              const link = document.createElement("a");
-              link.href = url;
-              link.click();
+              // Dùng "potplayer:" trực tiếp để tránh lỗi URL normalization của browser
+              launchPlayer(`potplayer:${streamUrl}`);
               art.notice.show = "Đang mở PotPlayer...";
               return true;
             },
@@ -52,16 +59,14 @@ export const Player = forwardRef<Artplayer, PlayerProps>(
             html: "nPlayer",
             onClick: function () {
               const streamUrl = art.option.url + (art.option.url.includes("?") ? "&" : "?") + "download=1";
-              const url = `nplayer-${streamUrl}`;
-              const link = document.createElement("a");
-              link.href = url;
-              link.click();
+              launchPlayer(`nplayer-${streamUrl}`);
               art.notice.show = "Đang mở nPlayer...";
               return true;
             },
           },
         ],
       });
+
       if (ref && typeof ref !== "function") ref.current = art;
       else if (ref && typeof ref === "function") ref(art);
 
@@ -74,6 +79,7 @@ export const Player = forwardRef<Artplayer, PlayerProps>(
         }
       };
     }, [option]);
+
     return <div ref={artRef} {...rest} />;
   },
 );
