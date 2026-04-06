@@ -26,7 +26,7 @@ export const Player = forwardRef<Artplayer, PlayerProps>(
             html: "VLC",
             onClick: function () {
               const streamUrl = art.option.url + (art.option.url.includes("?") ? "&" : "?") + "download=1";
-              const url = `vlc://${streamUrl}`;
+              const url = `vlc:${streamUrl}`;
               const a = document.createElement("a");
               a.href = url;
               a.click();
@@ -38,7 +38,7 @@ export const Player = forwardRef<Artplayer, PlayerProps>(
             html: "PotPlayer",
             onClick: function () {
               const streamUrl = art.option.url + (art.option.url.includes("?") ? "&" : "?") + "download=1";
-              const url = `potplayer://${streamUrl}`;
+              const url = `potplayer:${streamUrl}`;
               const a = document.createElement("a");
               a.href = url;
               a.click();

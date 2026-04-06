@@ -562,8 +562,8 @@ const ExternalPlayerDialog = memo(({ handleClose }: { handleClose: () => void })
     }
 
     let url = "";
-    if (player === "vlc") url = `vlc://${streamUrl}`;
-    if (player === "potplayer") url = `potplayer://${streamUrl}`;
+    if (player === "vlc") url = `vlc:${streamUrl}`;
+    if (player === "potplayer") url = `potplayer:${streamUrl}`;
     if (player === "nplayer") url = `nplayer-${streamUrl}`;
 
     const a = document.createElement("a");
@@ -574,13 +574,15 @@ const ExternalPlayerDialog = memo(({ handleClose }: { handleClose: () => void })
 
   return (
     <>
-      <ModalHeader className="flex flex-col gap-1 pb-0">Phát với</ModalHeader>
+      <ModalHeader className="flex flex-col items-center gap-1 pb-0 text-center">
+        Phát với
+      </ModalHeader>
       <ModalBody className="py-4">
         <div className="flex flex-col gap-2">
           <Button
             size="md"
             variant="filledTonal"
-            className="justify-start font-medium"
+            className="justify-center font-medium"
             onPress={() => onOpen("vlc")}
           >
             VLC Player
@@ -588,7 +590,7 @@ const ExternalPlayerDialog = memo(({ handleClose }: { handleClose: () => void })
           <Button
             size="md"
             variant="filledTonal"
-            className="justify-start font-medium"
+            className="justify-center font-medium"
             onPress={() => onOpen("potplayer")}
           >
             PotPlayer
@@ -596,14 +598,14 @@ const ExternalPlayerDialog = memo(({ handleClose }: { handleClose: () => void })
           <Button
             size="md"
             variant="filledTonal"
-            className="justify-start font-medium"
+            className="justify-center font-medium"
             onPress={() => onOpen("nplayer")}
           >
             nPlayer
           </Button>
         </div>
       </ModalBody>
-      <ModalFooter className="pt-0">
+      <ModalFooter className="justify-center pt-0">
         <Button size="sm" className="font-medium" variant="text" onPress={handleClose}>
           Đóng
         </Button>
@@ -654,7 +656,7 @@ export const FileOperationModal = memo(({ queryKey }: FileModalProps) => {
       size="xs"
       classNames={{
         wrapper: "overflow-hidden",
-        base: "bg-surface w-full shadow-none",
+        base: "bg-surface w-full shadow-none max-w-[220px]",
       }}
       placement="center"
       onClose={handleClose}
