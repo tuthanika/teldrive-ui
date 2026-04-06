@@ -11,17 +11,15 @@ interface PlayerProps {
 export const Player = forwardRef<Artplayer, PlayerProps>(
   ({ option, ...rest }, ref) => {
     const artRef = useRef<HTMLDivElement>(null);
-    
-    // Hàm dùng chung để kích hoạt URL handler
-    const launchPlayer = (url: string) => {
-      const link = document.createElement("a");
-      link.href = url;
-      link.style.display = "none";
-      document.body.appendChild(link);
-      link.click();
-      setTimeout(() => {
-        if (document.body.contains(link)) document.body.removeChild(link);
-      }, 100);
+
+    // Hàm tiện ích để mở protocol không bị trình duyệt chặn
+    const openProtocol = (url: string) => {
+      const a = document.createElement("a");
+      a.href = url;
+      a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => document.body.removeChild(a), 100);
     };
 
     useEffect(() => {
@@ -40,17 +38,17 @@ export const Player = forwardRef<Artplayer, PlayerProps>(
             html: "VLC",
             onClick: function () {
               const streamUrl = art.option.url + (art.option.url.includes("?") ? "&" : "?") + "download=1";
-              launchPlayer(`vlc://${streamUrl}`);
+              openProtocol(`vlc://${streamUrl}`);
               art.notice.show = "Đang mở VLC...";
-              return true;
+              return true; // Giữ menu mở hoặc đóng tùy ý
             },
           },
           {
             html: "PotPlayer",
             onClick: function () {
               const streamUrl = art.option.url + (art.option.url.includes("?") ? "&" : "?") + "download=1";
-              // Dùng "potplayer:" trực tiếp để tránh lỗi URL normalization của browser
-              launchPlayer(`potplayer:${streamUrl}`);
+              // Sửa lỗi: Dùng potplayer://? để bảo vệ dấu ":" của streamUrl
+              openProtocol(`potplayer://?${streamUrl}`);
               art.notice.show = "Đang mở PotPlayer...";
               return true;
             },
@@ -59,7 +57,7 @@ export const Player = forwardRef<Artplayer, PlayerProps>(
             html: "nPlayer",
             onClick: function () {
               const streamUrl = art.option.url + (art.option.url.includes("?") ? "&" : "?") + "download=1";
-              launchPlayer(`nplayer-${streamUrl}`);
+              openProtocol(`nplayer-${streamUrl}`);
               art.notice.show = "Đang mở nPlayer...";
               return true;
             },

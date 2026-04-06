@@ -544,7 +544,11 @@ const AssignChannelDialog = memo(({ queryKey, handleClose }: AssignChannelDialog
 });
 
 const ExternalPlayerDialog = memo(({ handleClose }: { handleClose: () => void }) => {
-  const { currentFile } = useModalStore(useShallow((state) => ({ currentFile: state.currentFile })));
+  const { currentFile } = useModalStore(
+    useShallow((state) => ({
+      currentFile: state.currentFile,
+    })),
+  );
   const [session] = useSession();
   const search = useSearch({ from: "/_authed/$view", shouldThrow: false }) as any;
   const params = useSearch({ from: "/share/$id", shouldThrow: false }) as any;
@@ -557,39 +561,72 @@ const ExternalPlayerDialog = memo(({ handleClose }: { handleClose: () => void })
       streamUrl = mediaUrl(currentFile.id, currentFile.name, search?.path || "", session?.hash || "", true);
     }
 
+    // Đảm bảo streamUrl không chứa khoảng trắng gây lỗi protocol
+    const cleanStreamUrl = streamUrl.trim();
     let url = "";
+
     if (player === "vlc") {
-      url = `vlc://${streamUrl}`;
+      url = `vlc://${cleanStreamUrl}`;
     } else if (player === "potplayer") {
-      // Dùng cú pháp này để tránh trình duyệt xóa dấu ":" và không cần encode %3a
-      url = `potplayer:${streamUrl}`; 
+      // Mẹo: Thêm //? vào sau potplayer: để ép trình duyệt giữ nguyên cấu trúc http:// phía sau
+      url = `potplayer://?${cleanStreamUrl}`;
     } else if (player === "nplayer") {
-      url = `nplayer-${streamUrl}`;
+      url = `nplayer-${cleanStreamUrl}`;
     }
 
     if (url) {
-      const link = document.createElement("a");
-      link.href = url;
-      link.style.display = "none";
-      document.body.appendChild(link); // Bắt buộc phải append vào body
-      link.click();
-      setTimeout(() => document.body.removeChild(link), 100); // Xóa sau khi click
+      // Cách kích hoạt protocol ổn định nhất trên cả Chrome/Edge/Safari
+      const a = document.createElement("a");
+      a.href = url;
+      a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
+      
+      // Dọn dẹp sau khi click
+      setTimeout(() => {
+        document.body.removeChild(a);
+      }, 100);
     }
     handleClose();
   };
 
   return (
     <>
-      <ModalHeader className="flex flex-col items-center gap-1 pb-0 text-center">Phát với</ModalHeader>
+      <ModalHeader className="flex flex-col items-center gap-1 pb-0 text-center">
+        Phát với
+      </ModalHeader>
       <ModalBody className="py-4">
         <div className="flex flex-col gap-2">
-          <Button size="md" variant="filledTonal" className="justify-center font-medium" onPress={() => onOpen("vlc")}>VLC Player</Button>
-          <Button size="md" variant="filledTonal" className="justify-center font-medium" onPress={() => onOpen("potplayer")}>PotPlayer</Button>
-          <Button size="md" variant="filledTonal" className="justify-center font-medium" onPress={() => onOpen("nplayer")}>nPlayer</Button>
+          <Button
+            size="md"
+            variant="filledTonal"
+            className="justify-center font-medium"
+            onPress={() => onOpen("vlc")}
+          >
+            VLC Player
+          </Button>
+          <Button
+            size="md"
+            variant="filledTonal"
+            className="justify-center font-medium"
+            onPress={() => onOpen("potplayer")}
+          >
+            PotPlayer
+          </Button>
+          <Button
+            size="md"
+            variant="filledTonal"
+            className="justify-center font-medium"
+            onPress={() => onOpen("nplayer")}
+          >
+            nPlayer
+          </Button>
         </div>
       </ModalBody>
       <ModalFooter className="justify-center pt-0">
-        <Button size="sm" className="font-medium" variant="text" onPress={handleClose}>Đóng</Button>
+        <Button size="sm" className="font-medium" variant="text" onPress={handleClose}>
+          Đóng
+        </Button>
       </ModalFooter>
     </>
   );
