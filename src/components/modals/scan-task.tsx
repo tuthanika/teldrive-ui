@@ -334,9 +334,20 @@ export function ScanTaskModal({ isOpen, onOpenChange, task }: ScanTaskModalProps
                         <FolderCreateButton 
                           parentId={watch("folderId") || parentId} 
                           onCreated={(f) => {
+                            const currentSelection = watch("folderId") || parentId;
+                            const newStack = [...pathStack];
+                            
+                            // If we created inside a subfolder that is visible in current list but not "entered"
+                            if (currentSelection && currentSelection !== parentId) {
+                              const selFolder = (folderData?.items || []).find((item: any) => item.id === currentSelection);
+                              if (selFolder) {
+                                newStack.push({ id: selFolder.id, name: selFolder.name });
+                              }
+                            }
+                            
                             setParentId(f.id);
                             setValue("folderId", f.id);
-                            setPathStack([...pathStack, { id: f.id, name: f.name }]);
+                            setPathStack([...newStack, { id: f.id, name: f.name }]);
                           }} 
                         />
                       </div>
@@ -371,8 +382,8 @@ export function ScanTaskModal({ isOpen, onOpenChange, task }: ScanTaskModalProps
                                 isIconOnly 
                                 size="sm" 
                                 variant="text" 
-                                className="h-6 w-6 min-w-0 opacity-0 group-hover:opacity-100"
-                                onPress={(e) => {
+                                className="h-6 w-6 min-w-0 text-on-surface-variant/50 group-hover:text-primary"
+                                onClick={(e) => {
                                   e.stopPropagation();
                                   setParentId(folder.id);
                                   setPathStack([...pathStack, { id: folder.id, name: folder.name }]);
