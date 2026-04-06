@@ -15,7 +15,7 @@ import {
 } from "@tw-material/react";
 import { useShallow } from "zustand/react/shallow";
 
-import { useModalStore, useSessionStore } from "@/utils/stores";
+import { useModalStore } from "@/utils/stores";
 import { Controller, useForm } from "react-hook-form";
 import { CustomActions } from "@/hooks/use-file-action";
 import { CopyButton } from "@/components/copy-button";
@@ -27,6 +27,7 @@ import HidePasswordIcon from "~icons/mdi/eye-off-outline";
 import MdiProtectedOutline from "~icons/mdi/protected-outline";
 import { $api } from "@/utils/api";
 import { useSearch } from "@tanstack/react-router";
+import { useSession } from "@/utils/query-options";
 
 type FileModalProps = {
   queryKey: any;
@@ -548,7 +549,7 @@ const ExternalPlayerDialog = memo(({ handleClose }: { handleClose: () => void })
       currentFile: state.currentFile,
     })),
   );
-  const { session } = useSessionStore();
+  const [session] = useSession();
   const search = useSearch({ from: "/_authed/$view", shouldThrow: false }) as any;
   const params = useSearch({ from: "/share/$id", shouldThrow: false }) as any;
 
@@ -557,7 +558,7 @@ const ExternalPlayerDialog = memo(({ handleClose }: { handleClose: () => void })
     if (params?.id) {
       streamUrl = sharedMediaUrl(params.id, currentFile.id, currentFile.name, true);
     } else {
-      streamUrl = mediaUrl(currentFile.id, currentFile.name, search?.path || "", session.hash, true);
+      streamUrl = mediaUrl(currentFile.id, currentFile.name, search?.path || "", session?.hash || "", true);
     }
 
     let url = "";
