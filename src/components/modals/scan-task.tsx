@@ -83,6 +83,130 @@ const FolderCreateButton = ({
   );
 };
 
+const ScheduleSelector = ({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (val: string) => void;
+}) => {
+  const [mode, setMode] = useState<"once" | "preset" | "cron">(() => {
+    if (!value) return "once";
+    if (value.includes("*") || value.split(" ").length > 1) {
+      return "cron";
+    }
+    return "once";
+  });
+
+  const presets = [
+    { name: "Mỗi phút", value: "* * * * *" },
+    { name: "Mỗi 5 phút", value: "*/5 * * * *" },
+    { name: "Mỗi 30 phút", value: "*/30 * * * *" },
+    { name: "Hàng giờ", value: "0 * * * *" },
+    { name: "Hàng ngày (00:00)", value: "0 0 * * *" },
+    { name: "Hàng tuần (Chủ nhật)", value: "0 0 * * 0" },
+    { name: "Hàng tháng (Ngày 1)", value: "0 0 1 * *" },
+  ];
+
+  const currentMode = useMemo(() => {
+    if (mode === "preset" && !presets.some((p) => p.value === value)) {
+       return "cron";
+    }
+    return mode;
+  }, [mode, value]);
+
+  return (
+    <div className="flex flex-col gap-4 p-4 rounded-2xl bg-surface-container-low/30 border border-outline-variant/10">
+      <div className="flex flex-col gap-1.5">
+        <label className="text-xs font-semibold text-primary/80 uppercase tracking-wider px-1">Chế độ lặp lại</label>
+        <div className="flex p-1 bg-surface-container-high rounded-xl gap-1">
+          <Button
+            size="sm"
+            variant={currentMode === "once" ? "flat" : "text"}
+            onPress={() => setMode("once")}
+            className={`flex-1 h-8 text-[11px] font-bold rounded-lg transition-all ${currentMode === "once" ? "bg-surface text-primary shadow-sm" : "text-on-surface-variant hover:bg-surface/50"}`}
+          >
+            Một lần
+          </Button>
+          <Button
+            size="sm"
+            variant={currentMode === "preset" ? "flat" : "text"}
+            onPress={() => {
+                setMode("preset");
+                if (!presets.some(p => p.value === value)) {
+                    onChange(presets[3].value); // Default to hourly
+                }
+            }}
+            className={`flex-1 h-8 text-[11px] font-bold rounded-lg transition-all ${currentMode === "preset" ? "bg-surface text-primary shadow-sm" : "text-on-surface-variant hover:bg-surface/50"}`}
+          >
+            Nhanh
+          </Button>
+          <Button
+            size="sm"
+            variant={currentMode === "cron" ? "flat" : "text"}
+            onPress={() => setMode("cron")}
+            className={`flex-1 h-8 text-[11px] font-bold rounded-lg transition-all ${currentMode === "cron" ? "bg-surface text-primary shadow-sm" : "text-on-surface-variant hover:bg-surface/50"}`}
+          >
+            Cron
+          </Button>
+        </div>
+      </div>
+
+      <div className="mt-1">
+        {currentMode === "once" && (
+          <Input
+            type="datetime-local"
+            label="Thời gian bắt đầu"
+            placeholder=" "
+            variant="bordered"
+            defaultValue={value?.includes("*") ? "" : value}
+            onChange={(e) => onChange(e.target.value)}
+            className="text-xs"
+          />
+        )}
+
+        {currentMode === "preset" && (
+          <Select
+            label="Chọn chu kỳ lặp lại"
+            variant="bordered"
+            selectedKeys={new Set([value])}
+            onSelectionChange={(keys) => {
+              const val = Array.from(keys)[0] as string;
+              onChange(val);
+            }}
+            className="text-xs font-medium"
+          >
+            {presets.map((p) => (
+              <SelectItem key={p.value} textValue={p.name}>
+                {p.name}
+              </SelectItem>
+            ))}
+          </Select>
+        )}
+
+        {currentMode === "cron" && (
+          <div className="space-y-2">
+            <Input
+              label="Biểu thức Cron"
+              placeholder="Ví dụ: 0 12 * * *"
+              variant="bordered"
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              className="font-mono text-xs"
+            />
+            <div className="bg-primary/5 p-2 rounded-lg border border-primary/10">
+                <p className="text-[10px] text-primary/80 leading-relaxed italic">
+                    Định dạng: Phút Giờ Ngày Tháng Thứ. <br/>
+                    Ví dụ: <span className="font-bold underline">0 12 * * *</span> chạy lúc 12:00 trưa mỗi ngày.
+                </p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 export function ScanTaskModal({ isOpen, onOpenChange, task }: ScanTaskModalProps) {
   const queryClient = useQueryClient();
   const { control, handleSubmit, watch, setValue, reset } = useForm<ScanFormValues>({
@@ -570,7 +694,7 @@ export function ScanTaskModal({ isOpen, onOpenChange, task }: ScanTaskModalProps
                     name="schedule"
                     control={control}
                     render={({ field }) => (
-                      <Input {...field} type="datetime-local" label="Thời gian bắt đầu / chu kỳ" variant="bordered" />
+                      <ScheduleSelector value={field.value || ""} onChange={field.onChange} />
                     )}
                   />
                 )}
