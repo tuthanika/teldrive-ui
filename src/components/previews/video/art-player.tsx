@@ -26,7 +26,10 @@ export const Player = forwardRef<Artplayer, PlayerProps>(
             html: "VLC",
             onClick: function () {
               const streamUrl = art.option.url + (art.option.url.includes("?") ? "&" : "?") + "download=1";
-              window.location.href = `vlc://${streamUrl}`;
+              const url = `vlc://${streamUrl}`;
+              const a = document.createElement("a");
+              a.href = url;
+              a.click();
               art.notice.show = "Đang mở VLC...";
               return true;
             },
@@ -35,7 +38,10 @@ export const Player = forwardRef<Artplayer, PlayerProps>(
             html: "PotPlayer",
             onClick: function () {
               const streamUrl = art.option.url + (art.option.url.includes("?") ? "&" : "?") + "download=1";
-              window.location.href = `potplayer://${streamUrl}`;
+              const url = `potplayer://${streamUrl}`;
+              const a = document.createElement("a");
+              a.href = url;
+              a.click();
               art.notice.show = "Đang mở PotPlayer...";
               return true;
             },
@@ -44,7 +50,10 @@ export const Player = forwardRef<Artplayer, PlayerProps>(
             html: "nPlayer",
             onClick: function () {
               const streamUrl = art.option.url + (art.option.url.includes("?") ? "&" : "?") + "download=1";
-              window.location.href = `nplayer-${streamUrl}`;
+              const url = `nplayer-${streamUrl}`;
+              const a = document.createElement("a");
+              a.href = url;
+              a.click();
               art.notice.show = "Đang mở nPlayer...";
               return true;
             },

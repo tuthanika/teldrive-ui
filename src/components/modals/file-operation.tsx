@@ -566,28 +566,45 @@ const ExternalPlayerDialog = memo(({ handleClose }: { handleClose: () => void })
     if (player === "potplayer") url = `potplayer://${streamUrl}`;
     if (player === "nplayer") url = `nplayer-${streamUrl}`;
 
-    window.location.href = url;
+    const a = document.createElement("a");
+    a.href = url;
+    a.click();
     handleClose();
   };
 
   return (
     <>
-      <ModalHeader className="flex flex-col gap-1">Phát với ứng dụng ngoài</ModalHeader>
-      <ModalBody>
+      <ModalHeader className="flex flex-col gap-1 pb-0">Phát với</ModalHeader>
+      <ModalBody className="py-4">
         <div className="flex flex-col gap-2">
-          <Button variant="filledTonal" className="justify-start" onPress={() => onOpen("vlc")}>
+          <Button
+            size="md"
+            variant="filledTonal"
+            className="justify-start font-medium"
+            onPress={() => onOpen("vlc")}
+          >
             VLC Player
           </Button>
-          <Button variant="filledTonal" className="justify-start" onPress={() => onOpen("potplayer")}>
+          <Button
+            size="md"
+            variant="filledTonal"
+            className="justify-start font-medium"
+            onPress={() => onOpen("potplayer")}
+          >
             PotPlayer
           </Button>
-          <Button variant="filledTonal" className="justify-start" onPress={() => onOpen("nplayer")}>
+          <Button
+            size="md"
+            variant="filledTonal"
+            className="justify-start font-medium"
+            onPress={() => onOpen("nplayer")}
+          >
             nPlayer
           </Button>
         </div>
       </ModalBody>
-      <ModalFooter>
-        <Button className="font-normal" variant="text" onPress={handleClose}>
+      <ModalFooter className="pt-0">
+        <Button size="sm" className="font-medium" variant="text" onPress={handleClose}>
           Đóng
         </Button>
       </ModalFooter>
@@ -634,7 +651,7 @@ export const FileOperationModal = memo(({ queryKey }: FileModalProps) => {
   return (
     <Modal
       isOpen={open}
-      size="md"
+      size="xs"
       classNames={{
         wrapper: "overflow-hidden",
         base: "bg-surface w-full shadow-none",
