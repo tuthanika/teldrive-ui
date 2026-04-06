@@ -561,14 +561,13 @@ const ExternalPlayerDialog = memo(({ handleClose }: { handleClose: () => void })
       streamUrl = mediaUrl(currentFile.id, currentFile.name, search?.path || "", session?.hash || "", true);
     }
 
+    const encodeUrl = (u: string) => u.replace(/:/g, "%3A");
     let url = "";
-    if (player === "vlc") url = `vlc:${streamUrl}`;
-    if (player === "potplayer") url = `potplayer:${streamUrl}`;
-    if (player === "nplayer") url = `nplayer-${streamUrl}`;
+    if (player === "vlc") url = `vlc://${encodeUrl(streamUrl)}`;
+    if (player === "potplayer") url = `potplayer://${encodeUrl(streamUrl)}`;
+    if (player === "nplayer") url = `nplayer-${encodeUrl(streamUrl)}`;
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.click();
+    window.location.assign(url);
     handleClose();
   };
 
