@@ -165,7 +165,7 @@ export const useAudioStore = create<PlayerState>((set, get) => {
           const tags = await parseAudioMetadata(url, controller.signal);
           const { artist, title, picture } = tags as Tags;
 
-          const cover = picture ? URL.createObjectURL(picture) : "";
+          const cover = picture ? URL.createObjectURL(picture) : DEFAULT_METADATA.cover;
           const metadata = {
             artist: artist || DEFAULT_METADATA.artist,
             title: title || name,
