@@ -561,6 +561,24 @@ const ExternalPlayerDialog = memo(({ handleClose }: { handleClose: () => void })
       streamUrl = mediaUrl(currentFile.id, currentFile.name, search?.path || "", session?.hash || "", true);
     }
 
+    if (player === "m3u" || player === "vlc" || player === "potplayer") {
+      const m3uContent = `#EXTM3U\n#EXTINF:-1,${currentFile.name}\n${streamUrl}`;
+      const blob = new Blob([m3uContent], { type: "application/x-mpegurl" });
+      const blobUrl = URL.createObjectURL(blob);
+      
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = `${currentFile.name.split(".").slice(0, -1).join(".") || "play"}.m3u`;
+      a.click();
+      
+      setTimeout(() => {
+        URL.revokeObjectURL(blobUrl);
+      }, 1000);
+      
+      handleClose();
+      return;
+    }
+
     let url = "";
     if (player === "vlc") {
       url = `vlc://${streamUrl}`;

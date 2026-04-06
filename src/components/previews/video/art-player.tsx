@@ -39,8 +39,15 @@ export const Player = forwardRef<Artplayer, PlayerProps>(
             html: "VLC",
             onClick: function () {
               const streamUrl = art.option.url + (art.option.url.includes("?") ? "&" : "?") + "download=1";
-              openExternal(`vlc://${streamUrl}`);
-              art.notice.show = "Đang mở VLC...";
+              const m3uContent = `#EXTM3U\n#EXTINF:-1,Play\n${streamUrl}`;
+              const blob = new Blob([m3uContent], { type: "application/x-mpegurl" });
+              const blobUrl = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = blobUrl;
+              a.download = "play.m3u";
+              a.click();
+              setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+              art.notice.show = "Đang mở VLC (qua m3u)...";
               return true;
             },
           },
@@ -48,9 +55,15 @@ export const Player = forwardRef<Artplayer, PlayerProps>(
             html: "PotPlayer",
             onClick: function () {
               const streamUrl = art.option.url + (art.option.url.includes("?") ? "&" : "?") + "download=1";
-              // Cấu trúc quan trọng nhất để fix lỗi nhận sai URL
-              openExternal(`potplayer://?${streamUrl}`);
-              art.notice.show = "Đang mở PotPlayer...";
+              const m3uContent = `#EXTM3U\n#EXTINF:-1,Play\n${streamUrl}`;
+              const blob = new Blob([m3uContent], { type: "application/x-mpegurl" });
+              const blobUrl = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = blobUrl;
+              a.download = "play.m3u";
+              a.click();
+              setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+              art.notice.show = "Đang mở PotPlayer (qua m3u)...";
               return true;
             },
           },
@@ -58,7 +71,10 @@ export const Player = forwardRef<Artplayer, PlayerProps>(
             html: "nPlayer",
             onClick: function () {
               const streamUrl = art.option.url + (art.option.url.includes("?") ? "&" : "?") + "download=1";
-              openExternal(`nplayer-${streamUrl}`);
+              const url = `nplayer-${streamUrl}`;
+              const a = document.createElement("a");
+              a.href = url;
+              a.click();
               art.notice.show = "Đang mở nPlayer...";
               return true;
             },
