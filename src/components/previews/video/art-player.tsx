@@ -26,7 +26,7 @@ export const Player = forwardRef<Artplayer, PlayerProps>(
             html: "VLC",
             onClick: function () {
               const url = art.option.url + (art.option.url.includes("?") ? "&" : "?") + "download=1";
-              window.location.href = `vlc://${url}`;
+              window.location.href = `vlc:${url}`;
               art.notice.show = "Đang mở VLC...";
               return true;
             },

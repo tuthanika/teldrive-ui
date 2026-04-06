@@ -117,11 +117,12 @@ export const mediaUrl = (
   download = false,
 ) => {
   const { settings } = useSettingsStore.getState();
+  const safeName = decodeURIComponent(name);
   if (settings.rcloneProxy && path) {
-    return `${settings.rcloneProxy}${path === "/" ? "" : path}/${encodeURIComponent(name)}`;
+    return `${settings.rcloneProxy}${path === "/" ? "" : path}/${encodeURIComponent(safeName)}`;
   }
   const url = new URL(window.location.origin);
-  url.pathname = `/api/files/${id}/${name}`;
+  url.pathname = `/api/files/${id}/${safeName}`;
   url.searchParams.set("hash", sessionHash);
   if (download) {
     url.searchParams.set("download", "1");
@@ -136,7 +137,8 @@ export const sharedMediaUrl = (
   download = false,
 ) => {
   const url = new URL(window.location.origin);
-  url.pathname = `/api/shares/${shareId}/files/${fileId}/${name}`;
+  const safeName = decodeURIComponent(name);
+  url.pathname = `/api/shares/${shareId}/files/${fileId}/${safeName}`;
   if (download) {
     url.searchParams.set("download", "1");
   }
