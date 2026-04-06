@@ -36,7 +36,7 @@ export const CustomActions = {
       name: "VLC",
       toolbar: true,
       contextMenu: true,
-      group: "OpenOptions",
+      group: "Phát với...",
       icon: IconFlatColorIconsVlc,
     },
   } as const),
@@ -48,7 +48,7 @@ export const CustomActions = {
       name: "PotPlayer",
       toolbar: true,
       contextMenu: true,
-      group: "OpenOptions",
+      group: "Phát với...",
       icon: IconPotPlayerIcon,
     },
   } as const),
@@ -60,7 +60,7 @@ export const CustomActions = {
       name: "nPlayer",
       toolbar: true,
       contextMenu: true,
-      group: "OpenOptions",
+      group: "Phát với...",
       icon: IconPotPlayerIcon,
     },
   } as const),
@@ -197,7 +197,7 @@ export const useFileAction = (
           const { selectedFiles } = data.state;
           const fileToOpen = selectedFiles[0];
           const { id, name } = fileToOpen!;
-          const url = `vlc://${mediaUrl(id, name, search?.path || "", session.hash)}`;
+          const url = `vlc://${mediaUrl(id, name, search?.path || "", session.hash, true)}`;
           navigateToExternalUrl(url, false);
           break;
         }
@@ -205,7 +205,7 @@ export const useFileAction = (
           const { selectedFiles } = data.state;
           const fileToOpen = selectedFiles[0];
           const { id, name } = fileToOpen!;
-          const url = `potplayer://${mediaUrl(id, name, search?.path || "", session.hash)}`;
+          const url = `potplayer://${mediaUrl(id, name, search?.path || "", session.hash, true)}`;
           navigateToExternalUrl(url, false);
           break;
         }
@@ -213,7 +213,7 @@ export const useFileAction = (
           const { selectedFiles } = data.state;
           const fileToOpen = selectedFiles[0];
           const { id, name } = fileToOpen!;
-          const url = `nplayer-${mediaUrl(id, name, search?.path || "", session.hash)}`;
+          const url = `nplayer-${mediaUrl(id, name, search?.path || "", session.hash, true)}`;
           navigateToExternalUrl(url, false);
           break;
         }
@@ -382,7 +382,7 @@ export const useShareFileAction = (params: ShareListParams) => {
           const { selectedFiles } = data.state;
           const fileToOpen = selectedFiles[0];
           const { id, name } = fileToOpen!;
-          const url = `vlc://${sharedMediaUrl(params.id, id, name)}`;
+          const url = `vlc://${sharedMediaUrl(params.id, id, name, true)}`;
           navigateToExternalUrl(url, false);
           break;
         }
@@ -390,7 +390,7 @@ export const useShareFileAction = (params: ShareListParams) => {
           const { selectedFiles } = data.state;
           const fileToOpen = selectedFiles[0];
           const { id, name } = fileToOpen!;
-          const url = `potplayer://${sharedMediaUrl(params.id, id, name)}`;
+          const url = `potplayer://${sharedMediaUrl(params.id, id, name, true)}`;
           navigateToExternalUrl(url, false);
           break;
         }
@@ -398,7 +398,7 @@ export const useShareFileAction = (params: ShareListParams) => {
           const { selectedFiles } = data.state;
           const fileToOpen = selectedFiles[0];
           const { id, name } = fileToOpen!;
-          const url = `nplayer-${sharedMediaUrl(params.id, id, name)}`;
+          const url = `nplayer-${sharedMediaUrl(params.id, id, name, true)}`;
           navigateToExternalUrl(url, false);
           break;
         }
