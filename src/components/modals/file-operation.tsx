@@ -561,30 +561,29 @@ const ExternalPlayerDialog = memo(({ handleClose }: { handleClose: () => void })
       streamUrl = mediaUrl(currentFile.id, currentFile.name, search?.path || "", session?.hash || "", true);
     }
 
-    // Đảm bảo streamUrl không chứa khoảng trắng gây lỗi protocol
-    const cleanStreamUrl = streamUrl.trim();
     let url = "";
-
     if (player === "vlc") {
-      url = `vlc://${cleanStreamUrl}`;
+      url = `vlc://${streamUrl}`;
     } else if (player === "potplayer") {
-      // Mẹo: Thêm //? vào sau potplayer: để ép trình duyệt giữ nguyên cấu trúc http:// phía sau
-      url = `potplayer://?${cleanStreamUrl}`;
+      // Sử dụng //? để ép trình duyệt không parse dấu ":" của http:// phía sau
+      url = `potplayer://?${streamUrl}`;
     } else if (player === "nplayer") {
-      url = `nplayer-${cleanStreamUrl}`;
+      url = `nplayer-${streamUrl}`;
     }
 
     if (url) {
-      // Cách kích hoạt protocol ổn định nhất trên cả Chrome/Edge/Safari
-      const a = document.createElement("a");
-      a.href = url;
-      a.style.display = "none";
-      document.body.appendChild(a);
-      a.click();
+      // Tạo thẻ a ẩn và gắn vào body để bypass bảo mật trình duyệt
+      const link = document.createElement("a");
+      link.href = url;
+      link.style.display = "none";
+      document.body.appendChild(link);
+      link.click();
       
-      // Dọn dẹp sau khi click
+      // Xóa thẻ sau khi click
       setTimeout(() => {
-        document.body.removeChild(a);
+        if (document.body.contains(link)) {
+          document.body.removeChild(link);
+        }
       }, 100);
     }
     handleClose();

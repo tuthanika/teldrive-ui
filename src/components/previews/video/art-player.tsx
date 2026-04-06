@@ -12,14 +12,16 @@ export const Player = forwardRef<Artplayer, PlayerProps>(
   ({ option, ...rest }, ref) => {
     const artRef = useRef<HTMLDivElement>(null);
 
-    // Hàm tiện ích để mở protocol không bị trình duyệt chặn
-    const openProtocol = (url: string) => {
-      const a = document.createElement("a");
-      a.href = url;
-      a.style.display = "none";
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => document.body.removeChild(a), 100);
+    // Helper function để mở protocol ổn định
+    const openExternal = (url: string) => {
+      const link = document.createElement("a");
+      link.href = url;
+      link.style.display = "none";
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => {
+        if (document.body.contains(link)) document.body.removeChild(link);
+      }, 100);
     };
 
     useEffect(() => {
@@ -27,7 +29,6 @@ export const Player = forwardRef<Artplayer, PlayerProps>(
         ...option,
         container: artRef.current!,
       });
-
       art.controls.add({
         name: "external",
         position: "right",
@@ -38,17 +39,17 @@ export const Player = forwardRef<Artplayer, PlayerProps>(
             html: "VLC",
             onClick: function () {
               const streamUrl = art.option.url + (art.option.url.includes("?") ? "&" : "?") + "download=1";
-              openProtocol(`vlc://${streamUrl}`);
+              openExternal(`vlc://${streamUrl}`);
               art.notice.show = "Đang mở VLC...";
-              return true; // Giữ menu mở hoặc đóng tùy ý
+              return true;
             },
           },
           {
             html: "PotPlayer",
             onClick: function () {
               const streamUrl = art.option.url + (art.option.url.includes("?") ? "&" : "?") + "download=1";
-              // Sửa lỗi: Dùng potplayer://? để bảo vệ dấu ":" của streamUrl
-              openProtocol(`potplayer://?${streamUrl}`);
+              // Cấu trúc quan trọng nhất để fix lỗi nhận sai URL
+              openExternal(`potplayer://?${streamUrl}`);
               art.notice.show = "Đang mở PotPlayer...";
               return true;
             },
@@ -57,14 +58,14 @@ export const Player = forwardRef<Artplayer, PlayerProps>(
             html: "nPlayer",
             onClick: function () {
               const streamUrl = art.option.url + (art.option.url.includes("?") ? "&" : "?") + "download=1";
-              openProtocol(`nplayer-${streamUrl}`);
+              openExternal(`nplayer-${streamUrl}`);
               art.notice.show = "Đang mở nPlayer...";
               return true;
             },
           },
         ],
       });
-
+      
       if (ref && typeof ref !== "function") ref.current = art;
       else if (ref && typeof ref === "function") ref(art);
 
@@ -77,7 +78,6 @@ export const Player = forwardRef<Artplayer, PlayerProps>(
         }
       };
     }, [option]);
-
     return <div ref={artRef} {...rest} />;
   },
 );
