@@ -28,6 +28,7 @@ import MdiProtectedOutline from "~icons/mdi/protected-outline";
 import { $api } from "@/utils/api";
 import { useSearch } from "@tanstack/react-router";
 import { useSession } from "@/utils/query-options";
+import toast from "react-hot-toast";
 
 type FileModalProps = {
   queryKey: any;
@@ -556,88 +557,55 @@ const ExternalPlayerDialog = memo(({ handleClose }: { handleClose: () => void })
   const onOpen = (player: string) => {
     let streamUrl = "";
     if (params?.id) {
-      streamUrl = sharedMediaUrl(params.id, currentFile.id, currentFile.name, true);
+      streamUrl = sharedMediaUrl(params.id, (currentFile as any).id, (currentFile as any).name, true);
     } else {
-      streamUrl = mediaUrl(currentFile.id, currentFile.name, search?.path || "", session?.hash || "", true);
+      streamUrl = mediaUrl((currentFile as any).id, (currentFile as any).name, search?.path || "", session?.hash || "", true);
     }
 
-    if (player === "m3u" || player === "vlc" || player === "potplayer") {
-      const m3uContent = `#EXTM3U\n#EXTINF:-1,${currentFile.name}\n${streamUrl}`;
-      const blob = new Blob([m3uContent], { type: "application/x-mpegurl" });
-      const blobUrl = URL.createObjectURL(blob);
-      
-      const a = document.createElement("a");
-      a.href = blobUrl;
-      a.download = `${currentFile.name.split(".").slice(0, -1).join(".") || "play"}.m3u`;
-      a.click();
-      
-      setTimeout(() => {
-        URL.revokeObjectURL(blobUrl);
-      }, 1000);
-      
+    let url = "";
+    if (player === "vlc") url = `vlc://${streamUrl}`;
+    if (player === "potplayer") url = `potplayer://?${streamUrl}`;
+    if (player === "nplayer") url = `nplayer-${streamUrl}`;
+
+    if (player === "copy") {
+      navigator.clipboard.writeText(streamUrl);
+      toast.success("Đã copy link");
       handleClose();
       return;
     }
 
-    let url = "";
-    if (player === "vlc") {
-      url = `vlc://${streamUrl}`;
-    } else if (player === "potplayer") {
-      // Sử dụng //? để ép trình duyệt không parse dấu ":" của http:// phía sau
-      url = `potplayer://?${streamUrl}`;
-    } else if (player === "nplayer") {
-      url = `nplayer-${streamUrl}`;
-    }
-
     if (url) {
-      // Tạo thẻ a ẩn và gắn vào body để bypass bảo mật trình duyệt
       const link = document.createElement("a");
       link.href = url;
-      link.style.display = "none";
-      document.body.appendChild(link);
       link.click();
-      
-      // Xóa thẻ sau khi click
-      setTimeout(() => {
-        if (document.body.contains(link)) {
-          document.body.removeChild(link);
-        }
-      }, 100);
     }
     handleClose();
   };
 
+  const players = [
+    { id: "vlc", name: "VLC Player" },
+    { id: "potplayer", name: "PotPlayer" },
+    { id: "nplayer", name: "nPlayer" },
+  ];
+
   return (
     <>
       <ModalHeader className="flex flex-col items-center gap-1 pb-0 text-center">
-        Phát với
+        Phát với ứng dụng ngoài
       </ModalHeader>
       <ModalBody className="py-4">
         <div className="flex flex-col gap-2">
-          <Button
-            size="md"
-            variant="filledTonal"
-            className="justify-center font-medium"
-            onPress={() => onOpen("vlc")}
-          >
-            VLC Player
-          </Button>
-          <Button
-            size="md"
-            variant="filledTonal"
-            className="justify-center font-medium"
-            onPress={() => onOpen("potplayer")}
-          >
-            PotPlayer
-          </Button>
-          <Button
-            size="md"
-            variant="filledTonal"
-            className="justify-center font-medium"
-            onPress={() => onOpen("nplayer")}
-          >
-            nPlayer
-          </Button>
+          {players.map((p) => (
+            <Button
+              key={p.id}
+              size="md"
+              variant="filledTonal"
+              className="justify-center font-medium"
+              onPress={() => onOpen(p.id)}
+            >
+              {p.name}
+            </Button>
+          ))}
         </div>
       </ModalBody>
       <ModalFooter className="justify-center pt-0">
