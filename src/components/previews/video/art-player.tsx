@@ -26,8 +26,10 @@ export const Player = forwardRef<Artplayer, PlayerProps>(
             html: "VLC",
             onClick: function () {
               const streamUrl = art.option.url + (art.option.url.includes("?") ? "&" : "?") + "download=1";
-              const url = `vlc:${streamUrl}`;
-              window.location.assign(url);
+              const url = `vlc://${streamUrl}`;
+              const link = document.createElement("a");
+              link.href = url;
+              link.click();
               art.notice.show = "Đang mở VLC...";
               return true;
             },
@@ -36,8 +38,12 @@ export const Player = forwardRef<Artplayer, PlayerProps>(
             html: "PotPlayer",
             onClick: function () {
               const streamUrl = art.option.url + (art.option.url.includes("?") ? "&" : "?") + "download=1";
-              const url = `potplayer:${streamUrl}`;
-              window.location.assign(url);
+              // Fix lỗi mất dấu ":" bằng cách encode thủ công duy nhất protocol con
+              const safeStreamUrl = streamUrl.replace("://", "%3a//");
+              const url = `potplayer://${safeStreamUrl}`;
+              const link = document.createElement("a");
+              link.href = url;
+              link.click();
               art.notice.show = "Đang mở PotPlayer...";
               return true;
             },
@@ -47,7 +53,9 @@ export const Player = forwardRef<Artplayer, PlayerProps>(
             onClick: function () {
               const streamUrl = art.option.url + (art.option.url.includes("?") ? "&" : "?") + "download=1";
               const url = `nplayer-${streamUrl}`;
-              window.location.assign(url);
+              const link = document.createElement("a");
+              link.href = url;
+              link.click();
               art.notice.show = "Đang mở nPlayer...";
               return true;
             },

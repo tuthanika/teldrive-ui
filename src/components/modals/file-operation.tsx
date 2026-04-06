@@ -562,11 +562,22 @@ const ExternalPlayerDialog = memo(({ handleClose }: { handleClose: () => void })
     }
 
     let url = "";
-    if (player === "vlc") url = `vlc:${streamUrl}`;
-    if (player === "potplayer") url = `potplayer:${streamUrl}`;
-    if (player === "nplayer") url = `nplayer-${streamUrl}`;
+    // Mẹo: Encode dấu ":" thành %3a để tránh trình duyệt "normalize" làm mất dấu : trong https://
+    const safeStreamUrl = streamUrl.replace("://", "%3a//");
 
-    window.location.assign(url);
+    if (player === "vlc") {
+      url = `vlc://${streamUrl}`; // VLC thường xử lý tốt URL thô
+    } else if (player === "potplayer") {
+      url = `potplayer://${safeStreamUrl}`; 
+    } else if (player === "nplayer") {
+      url = `nplayer-${streamUrl}`;
+    }
+
+    if (url) {
+      const link = document.createElement("a");
+      link.href = url;
+      link.click();
+    }
     handleClose();
   };
 
