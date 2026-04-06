@@ -15,13 +15,13 @@ import {
 } from "@tw-material/react";
 import { useShallow } from "zustand/react/shallow";
 
-import { useModalStore } from "@/utils/stores";
+import { useModalStore, useSessionStore } from "@/utils/stores";
 import { Controller, useForm } from "react-hook-form";
 import { CustomActions } from "@/hooks/use-file-action";
 import { CopyButton } from "@/components/copy-button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import IcRoundClose from "~icons/ic/round-close";
-import { getNextDate } from "@/utils/common";
+import { getNextDate, mediaUrl, sharedMediaUrl } from "@/utils/common";
 import ShowPasswordIcon from "~icons/mdi/eye-outline";
 import HidePasswordIcon from "~icons/mdi/eye-off-outline";
 import MdiProtectedOutline from "~icons/mdi/protected-outline";
@@ -542,6 +542,58 @@ const AssignChannelDialog = memo(({ queryKey, handleClose }: AssignChannelDialog
   );
 });
 
+const ExternalPlayerDialog = memo(({ handleClose }: { handleClose: () => void }) => {
+  const { currentFile } = useModalStore(
+    useShallow((state) => ({
+      currentFile: state.currentFile,
+    })),
+  );
+  const { session } = useSessionStore();
+  const search = useSearch({ from: "/_authed/$view", shouldThrow: false }) as any;
+  const params = useSearch({ from: "/share/$id", shouldThrow: false }) as any;
+
+  const onOpen = (player: string) => {
+    let streamUrl = "";
+    if (params?.id) {
+      streamUrl = sharedMediaUrl(params.id, currentFile.id, currentFile.name, true);
+    } else {
+      streamUrl = mediaUrl(currentFile.id, currentFile.name, search?.path || "", session.hash, true);
+    }
+
+    let url = "";
+    if (player === "vlc") url = `vlc://${streamUrl}`;
+    if (player === "potplayer") url = `potplayer://${streamUrl}`;
+    if (player === "nplayer") url = `nplayer-${streamUrl}`;
+
+    window.location.href = url;
+    handleClose();
+  };
+
+  return (
+    <>
+      <ModalHeader className="flex flex-col gap-1">Phát với ứng dụng ngoài</ModalHeader>
+      <ModalBody>
+        <div className="flex flex-col gap-2">
+          <Button variant="filledTonal" className="justify-start" onPress={() => onOpen("vlc")}>
+            VLC Player
+          </Button>
+          <Button variant="filledTonal" className="justify-start" onPress={() => onOpen("potplayer")}>
+            PotPlayer
+          </Button>
+          <Button variant="filledTonal" className="justify-start" onPress={() => onOpen("nplayer")}>
+            nPlayer
+          </Button>
+        </div>
+      </ModalBody>
+      <ModalFooter>
+        <Button className="font-normal" variant="text" onPress={handleClose}>
+          Đóng
+        </Button>
+      </ModalFooter>
+    </>
+  );
+});
+
 export const FileOperationModal = memo(({ queryKey }: FileModalProps) => {
   const { open, operation, actions } = useModalStore(
     useShallow((state) => ({
@@ -571,6 +623,8 @@ export const FileOperationModal = memo(({ queryKey }: FileModalProps) => {
         return <ShareFileDialog handleClose={handleClose} />;
       case CustomActions.AssignChannel.id:
         return <AssignChannelDialog queryKey={queryKey} handleClose={handleClose} />;
+      case CustomActions.ExternalPlayer.id:
+        return <ExternalPlayerDialog handleClose={handleClose} />;
       default:
         return null;
     }

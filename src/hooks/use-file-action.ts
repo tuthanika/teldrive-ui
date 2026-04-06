@@ -28,40 +28,16 @@ import { useNavigate } from "@tanstack/react-router";
 import { $api } from "@/utils/api";
 
 export const CustomActions = {
-  OpenInVLCPlayer: defineFileAction({
-    id: "open_vlc_player",
+  ExternalPlayer: defineFileAction({
+    id: "external_player",
     requiresSelection: true,
     fileFilter: (item) => !FileHelper.isDirectory(item) && item?.previewType === "video",
     button: {
-      name: "↳ VLC",
+      name: "Phát với ứng dụng ngoài",
       toolbar: true,
       contextMenu: true,
-      group: "Phát với ứng dụng ngoài",
-      icon: IconFlatColorIconsVlc,
-    },
-  } as const),
-  OpenInPotPlayer: defineFileAction({
-    id: "open_pot_player",
-    requiresSelection: true,
-    fileFilter: (item) => !FileHelper.isDirectory(item) && item?.previewType === "video",
-    button: {
-      name: "↳ PotPlayer",
-      toolbar: true,
-      contextMenu: true,
-      group: "Phát với ứng dụng ngoài",
-      icon: IconPotPlayerIcon,
-    },
-  } as const),
-  OpenInNPlayer: defineFileAction({
-    id: "open_n_player",
-    requiresSelection: true,
-    fileFilter: (item) => !FileHelper.isDirectory(item) && item?.previewType === "video",
-    button: {
-      name: "↳ nPlayer",
-      toolbar: true,
-      contextMenu: true,
-      group: "Phát với ứng dụng ngoài",
-      icon: IconPotPlayerIcon,
+      group: "Phát với",
+      icon: FbIconName.play,
     },
   } as const),
   ShareFiles: defineFileAction({
@@ -193,31 +169,13 @@ export const useFileAction = (
           }
           break;
         }
-        case CustomActions.OpenInVLCPlayer.id: {
+        case CustomActions.ExternalPlayer.id: {
           const { selectedFiles } = data.state;
-          const fileToOpen = selectedFiles[0];
-          const { id, name } = fileToOpen!;
-          const streamUrl = mediaUrl(id, name, search?.path || "", session.hash, true);
-          const url = `vlc://${encodeURIComponent(streamUrl)}`;
-          navigateToExternalUrl(url, false);
-          break;
-        }
-        case CustomActions.OpenInPotPlayer.id: {
-          const { selectedFiles } = data.state;
-          const fileToOpen = selectedFiles[0];
-          const { id, name } = fileToOpen!;
-          const streamUrl = mediaUrl(id, name, search?.path || "", session.hash, true);
-          const url = `potplayer://${encodeURIComponent(streamUrl)}`;
-          navigateToExternalUrl(url, false);
-          break;
-        }
-        case CustomActions.OpenInNPlayer.id: {
-          const { selectedFiles } = data.state;
-          const fileToOpen = selectedFiles[0];
-          const { id, name } = fileToOpen!;
-          const streamUrl = mediaUrl(id, name, search?.path || "", session.hash, true);
-          const url = `nplayer-${encodeURIComponent(streamUrl)}`;
-          navigateToExternalUrl(url, false);
+          actions.set({
+            open: true,
+            operation: CustomActions.ExternalPlayer.id,
+            currentFile: selectedFiles[0],
+          });
           break;
         }
         case FbActions.RenameFile.id: {
@@ -381,31 +339,13 @@ export const useShareFileAction = (params: ShareListParams) => {
           }
           break;
         }
-        case CustomActions.OpenInVLCPlayer.id: {
+        case CustomActions.ExternalPlayer.id: {
           const { selectedFiles } = data.state;
-          const fileToOpen = selectedFiles[0];
-          const { id, name } = fileToOpen!;
-          const streamUrl = sharedMediaUrl(params.id, id, name, true);
-          const url = `vlc://${encodeURIComponent(streamUrl)}`;
-          navigateToExternalUrl(url, false);
-          break;
-        }
-        case CustomActions.OpenInPotPlayer.id: {
-          const { selectedFiles } = data.state;
-          const fileToOpen = selectedFiles[0];
-          const { id, name } = fileToOpen!;
-          const streamUrl = sharedMediaUrl(params.id, id, name, true);
-          const url = `potplayer://${encodeURIComponent(streamUrl)}`;
-          navigateToExternalUrl(url, false);
-          break;
-        }
-        case CustomActions.OpenInNPlayer.id: {
-          const { selectedFiles } = data.state;
-          const fileToOpen = selectedFiles[0];
-          const { id, name } = fileToOpen!;
-          const streamUrl = sharedMediaUrl(params.id, id, name, true);
-          const url = `nplayer-${encodeURIComponent(streamUrl)}`;
-          navigateToExternalUrl(url, false);
+          actions.set({
+            open: true,
+            operation: CustomActions.ExternalPlayer.id,
+            currentFile: selectedFiles[0],
+          });
           break;
         }
 
