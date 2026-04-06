@@ -49,6 +49,7 @@ const modalFileActions = [
   FbActions.DeleteFiles.id,
   CustomActions.ShareFiles.id,
   CustomActions.AssignChannel.id,
+  CustomActions.ExternalPlayer.id,
 ];
 
 const fileRoute = getRouteApi("/_authed/$view");
